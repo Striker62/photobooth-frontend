@@ -1,6 +1,7 @@
 <template>
   <q-page id="admin-page" padding>
     <div class="row col-xs-12 col-sm-4 col-md-3 col-lg-3">
+      <AdminLightMeter />
       <AdminPrintQueue v-if="store.information_onetime.platform_system === 'Linux'" />
       <q-card flat class="q-mr-md q-mb-md">
         <q-card-section>
@@ -539,6 +540,7 @@
 </template>
 
 <script setup lang="ts">
+import AdminLightMeter from '@/components/AdminLightMeter.vue'
 import AdminPrintQueue from '@/components/AdminPrintQueue.vue'
 import { computed, ref } from 'vue'
 import { useMediacollectionStore } from '@/stores/mediacollection-store'
