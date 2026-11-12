@@ -22,12 +22,21 @@
     </q-card-section>
     <q-card-actions>
       <q-btn flat label="Aktualisieren" :loading="busy" @click="refresh" />
+      <q-btn
+        v-if="data?.state === 'ok' || data?.state === 'disabled'"
+        flat
+        label="Warteschlange neu starten"
+        :disable="busy"
+        @click="confirm = { restart: true }"
+      />
       <q-btn v-if="data?.state === 'disabled'" flat label="Fortsetzen" :disable="busy" @click="confirm = {}" />
     </q-card-actions>
     <q-dialog :model-value="confirm !== null" @hide="confirm = null">
       <q-card>
         <q-card-section>
-          {{ confirm?.job ? `Druckauftrag ${confirm.job} abbrechen?` : 'Warteschlange fortsetzen? Offene Aufträge können sofort gedruckt werden.' }}
+          {{ confirm?.job ? `Druckauftrag ${confirm.job} abbrechen?` : confirm?.restart
+          ? 'Warteschlange neu starten? Offene Aufträge können danach sofort gedruckt werden.'
+          : 'Warteschlange fortsetzen? Offene Aufträge können sofort gedruckt werden.' }}
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Zurück" v-close-popup />
@@ -54,7 +63,7 @@ const queue = ref<string | null>(null)
 const data = ref<QueueStatus | null>(null)
 const busy = ref(false)
 const error = ref('')
-const confirm = ref<{ job?: string } | null>(null)
+const confirm = ref<{ job?: string; restart?: boolean } | null>(null)
 const endpoint = '/api/admin/printers'
 
 async function request(path: string, method = 'GET') {
@@ -87,13 +96,14 @@ async function refresh() {
 async function apply() {
   if (!queue.value || !confirm.value) return
   const path = '/' + encodeURIComponent(queue.value)
-  const action = confirm.value.job ? '/jobs/' + encodeURIComponent(confirm.value.job) + '/cancel' : '/resume'
+  const action = confirm.value.job ? '/jobs/' + encodeURIComponent(confirm.value.job) + '/cancel' : confirm.value.restart ? '/restart' : '/resume'
   confirm.value = null
   busy.value = true
   error.value = ''
   try {
     data.value = await request(path + action, 'POST')
   } catch (cause) {
+    data.value = await request(path).catch(() => null)
     error.value = String(cause)
   } finally {
     busy.value = false
