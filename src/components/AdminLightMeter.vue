@@ -39,6 +39,8 @@ const metrics = computed(() => {
   return [
     { label: 'Belichtungszeit', value: stats?.exposure_time_ms, unit: 'ms' },
     { label: 'Analoge Verstärkung', value: stats?.again, unit: '×' },
+    { label: 'Weißabgleich Rot', value: stats?.colour_gain_red, unit: '×' },
+    { label: 'Weißabgleich Blau', value: stats?.colour_gain_blue, unit: '×' },
     { label: 'Farbtemperatur (geschätzt)', value: stats?.colour_temperature, unit: 'K' },
   ].filter((item) => typeof item.value === 'number')
 })
