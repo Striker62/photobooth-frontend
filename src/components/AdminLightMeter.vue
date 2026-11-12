@@ -14,11 +14,19 @@
         <div class="text-caption">Gemessen an der Livevorschau</div>
         <div v-for="item in metrics" :key="item.label">{{ item.label }}: {{ item.value }} {{ item.unit }}</div>
       </template>
+      <AdminLightSettings
+        v-if="camera?.backend_type === 'Picamera2'"
+        :key="cameraIndex"
+        :camera-index="cameraIndex"
+        :red="measurement ? stats?.colour_gain_red : undefined"
+        :blue="measurement ? stats?.colour_gain_blue : undefined"
+      />
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
+import AdminLightSettings from '@/components/AdminLightSettings.vue'
 import { computed, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { useConfigurationStore } from '@/stores/configuration-store'
 import { useMainStore } from '@/stores/main-store'
@@ -32,16 +40,19 @@ const measurement = ref<{ bars: number[]; dark: string; bright: string } | null>
 const message = ref('')
 let nextFrame: ReturnType<typeof setTimeout> | undefined
 
+const camera = computed(() => config.configuration.cameras.group_backends.filter((entry) => entry.enabled)[cameraIndex.value]?.backend_config)
+const stats = computed(() => {
+  const selectedCamera = camera.value
+  if (selectedCamera?.backend_type !== 'Picamera2' || !('camera_num' in selectedCamera)) return undefined
+  return store.information_interval.backends[`Picamera2Backend:${selectedCamera.camera_num}`]
+})
 const metrics = computed(() => {
-  const camera = config.configuration.cameras.group_backends.filter((entry) => entry.enabled)[cameraIndex.value]?.backend_config
-  if (camera?.backend_type !== 'Picamera2' || !('camera_num' in camera)) return []
-  const stats = store.information_interval.backends[`Picamera2Backend:${camera.camera_num}`]
   return [
-    { label: 'Belichtungszeit', value: stats?.exposure_time_ms, unit: 'ms' },
-    { label: 'Analoge Verstärkung', value: stats?.again, unit: '×' },
-    { label: 'Weißabgleich Rot', value: stats?.colour_gain_red, unit: '×' },
-    { label: 'Weißabgleich Blau', value: stats?.colour_gain_blue, unit: '×' },
-    { label: 'Farbtemperatur (geschätzt)', value: stats?.colour_temperature, unit: 'K' },
+    { label: 'Belichtungszeit', value: stats.value?.exposure_time_ms, unit: 'ms' },
+    { label: 'Analoge Verstärkung', value: stats.value?.again, unit: '×' },
+    { label: 'Weißabgleich Rot', value: stats.value?.colour_gain_red, unit: '×' },
+    { label: 'Weißabgleich Blau', value: stats.value?.colour_gain_blue, unit: '×' },
+    { label: 'Farbtemperatur (geschätzt)', value: stats.value?.colour_temperature, unit: 'K' },
   ].filter((item) => typeof item.value === 'number')
 })
 

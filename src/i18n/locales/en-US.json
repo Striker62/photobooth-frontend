@@ -148,6 +148,8 @@
       "service_disabled": "The shareservice is disabled! Please enable it in the admin configuration before use.",
       "quota_exceeded": "{action_name} quota exceeded ({quota} maximum).",
       "blocked_request_ignored": "No yet ready, please wait another {remaining_s}s before trying again.",
+      "print_accepted": "Print job accepted.",
+      "print_queue_paused": "Printer paused. Please ask the attendant for help.",
       "process_started": "{action_name} started.",
       "process_failed": "😔 Error while processing the action. Please try again.",
       "quota_notification": "{action_name} quota is {current_shares} of {quota}",

@@ -147,6 +147,8 @@
       "service_disabled": "Der Dienst zum Teilen ist deaktiviert! Bitte aktivieren Sie ihn vor der Verwendung in der Admin-Konfiguration.",
       "quota_exceeded": "{action_name} Limit überschritten ({quota} maximal).",
       "blocked_request_ignored": "Noch nicht fertig, bitte warte weitere {remaining_s}s, bevor du es erneut versuchst.",
+      "print_accepted": "Druckauftrag angenommen.",
+      "print_queue_paused": "Drucker angehalten – bitte Betreuung rufen.",
       "process_started": "{action_name} gestartet.",
       "process_failed": "😔 Fehler beim Verarbeiten des Jobs. Bitte versuche es erneut.",
       "quota_notification": "{action_name} Kontingent ist {current_shares} von {quota}",
