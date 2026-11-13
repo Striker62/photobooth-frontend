@@ -7,6 +7,11 @@
       <q-select v-if="profiles.length" v-model="selected" :options="profiles.map((profile) => profile.name)" label="Lichtprofil laden" :disable="busy" @update:model-value="loadProfile" />
       <q-input v-model.number="draft.exposure_compensation" type="number" min="-3" max="3" step="0.1" label="Belichtungskorrektur (EV)" :disable="busy" />
       <q-select v-model="draft.white_balance_mode" :options="modes" label="Weißabgleich" :disable="busy" />
+      <template v-if="draft.white_balance_mode === 'Auto'">
+        <div class="q-mt-sm">Blaukorrektur: {{ draft.auto_blue_correction }} %</div>
+        <q-slider v-model="draft.auto_blue_correction" :min="-15" :max="15" :step="1" :disable="busy" aria-label="Blaukorrektur" />
+        <div class="row justify-between text-caption"><span>Wärmer</span><span>Kühler</span></div>
+      </template>
       <template v-if="draft.white_balance_mode === 'Manual'">
         <q-input v-model.number="draft.white_balance_red_gain" type="number" min="0.001" max="32" step="0.001" label="Rot-Verstärkung" :disable="busy" />
         <q-input v-model.number="draft.white_balance_blue_gain" type="number" min="0.001" max="32" step="0.001" label="Blau-Verstärkung" :disable="busy" />
@@ -32,6 +37,7 @@ const props = defineProps<{ cameraIndex: number; red: unknown; blue: unknown }>(
 const modes = ['Daylight', 'Auto', 'Cloudy', 'Indoor', 'Tungsten', 'Fluorescent', 'Manual'] as const
 interface LightSettings {
   exposure_compensation: number
+  auto_blue_correction: number
   white_balance_mode: (typeof modes)[number]
   white_balance_red_gain: number
   white_balance_blue_gain: number
@@ -87,7 +93,7 @@ async function perform(action: () => Promise<void>) {
 }
 
 function show(data: LightResponse) {
-  draft.value = { ...(data.trial ?? data.settings) }
+  draft.value = { ...(data.trial ?? data.settings), auto_blue_correction: (data.trial ?? data.settings).auto_blue_correction ?? 0 }
   profiles.value = data.profiles
   testing.value = data.trial !== null
 }
@@ -106,7 +112,7 @@ function loadProfile(name: string) {
   const profile = profiles.value.find((item) => item.name === name)
   if (!profile) return
   const { name: profileLabel, ...settings } = profile
-  draft.value = settings
+  draft.value = { ...settings, auto_blue_correction: settings.auto_blue_correction ?? 0 }
   profileName.value = profileLabel
 }
 
