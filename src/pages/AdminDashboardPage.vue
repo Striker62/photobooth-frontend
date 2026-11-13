@@ -119,7 +119,7 @@
               </q-item-section>
 
               <q-item-section side>
-                <q-btn flat round color="green" icon="sym_o_upgrade" href="https://pypi.org/project/photobooth-app/" target="_blank" />
+                <q-btn flat round color="green" icon="sym_o_upgrade" aria-label="Update der Fotobox" @click="showUpdate = true" />
               </q-item-section>
             </q-item>
 
@@ -536,6 +536,18 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="showUpdate">
+      <q-card style="width: 44rem; max-width: 90vw">
+        <q-card-section class="text-h6">Fotobox aktualisieren</q-card-section>
+        <q-card-section>
+          <p>Führe diesen Befehl als Benutzer pi im Terminal auf dem Raspberry Pi aus. Während des Updates ist die Fotobox kurz offline.</p>
+          <q-input :model-value="updateCommand" type="textarea" readonly outlined autogrow />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Schließen" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -553,6 +565,10 @@ import DashboardGenericStatsCard from '@/components/DashboardGenericStatsCard.vu
 const { locale } = useI18n({ useScope: 'global' })
 const store = useMainStore()
 const mediacollectionStore = useMediacollectionStore()
+const showUpdate = ref(false)
+const updateCommand = `systemctl --user stop photobooth-app.service &&
+pipx install --force --system-site-packages 'git+https://github.com/Striker62/photobooth-app.git@test/v9.0.0-light-meter' --pip-args='--prefer-binary' &&
+systemctl --user start photobooth-app.service`
 const selected_field = ref('')
 const confirm_reset_limits_counter = ref(false)
 const confirm_reset_stats_counter = ref(false)
